@@ -1,0 +1,162 @@
+---
+title: "Assignment Part 1"
+author: "Kaumadi Wijesooriya (219362267)"
+theme: cosmo
+output:
+  word_document: default
+  pdf_document: default
+  html_document: default
+---
+#github url: https://github.com/Kaumadi55/SLE-712.git
+    
+## Question 1- downloading file and reading into R
+Here 'download.file()' command was used to obtain the dataset. 
+  it was read into R. It is important to set 'header=TRUE' and 'raw.names=1', so that the data is formated properly. 
+  Also the 'head' command was used to obtain first 6 lines of the dataset and 'str' command to obtain the structure. 
+  The argument 'stringsAsFactors=FALSE' was used to obtain the factors as neumarical. 
+
+```{r,chunk1,echo=TRUE}
+
+# question 1
+
+download.file("https://raw.githubusercontent.com/markziemann/SLE712_files/master/bioinfo_asst3_part1_files/gene_expression.tsv",destfile = "gene_expression.tsv")
+readit<- read.table("gene_expression.tsv")
+head(readit)
+str(readit)
+readit<- read.table("gene_expression.tsv",header = TRUE)
+head(readit)
+str(readit)
+readit<- read.table("gene_expression.tsv",header = TRUE, stringsAsFactors = FALSE)
+head(readit)
+str(readit)
+readit<- read.table("gene_expression.tsv",header = TRUE, stringsAsFactors = FALSE, row.names = 1)
+head(readit)
+str(readit)
+
+```
+## Question 2- Finding the mean
+Here a new column has made for mean values of 2 RNA sequences, using the command 'mean()'. also '$' sign was used to perform the extraction as an object. Here the 'rowMeans()' command was used to obtain the mean values in a new row.
+
+```{r,chunk2,echo=TRUE}
+
+# question 2
+
+readit$mean <- (readit$SRR5150592+readit$SRR5150593)/2
+rowMeans(readit)
+head(readit)
+
+```
+## Question 3- making an order for 10 genes with the highest mean expression
+Here the 'order()' command was used to make the mean expressions in accending order and the minus sign indicates descending order.
+
+```{r,chunk3,echo=TRUE}
+# question 3
+
+order(readit$mean)
+order(-readit$mean)
+readit[order(-readit$mean),]
+expression <- readit[order(-readit$mean),]
+head(expression,10)
+
+```
+## Question 4 - Determining the number of genes with a mean values <10
+Here the 'subset()' command was used to make a subset of mean values less than 10. 
+'nrow()' command was used to display the number of rows present in the data matrix.
+
+```{r,chunk4,echo=TRUE}
+# question 4
+
+filtered<- subset(readit, mean < 10)
+nrow(filtered)
+
+```
+## Question 5 - Making a histogram plot of the mean values
+Here the 'hist()' command was used to compute a histogram for mean values. In the histogram, 'main' stands for the title of histogram. 
+'xlab=' command represents the cordinates of 'X' axis and 'xlim=' command reprecents the cordinates of 'Y' axis. 
+The 'border=' function was used to colour the border in black and 'col=' function was used to colour the column in green in the histogram. 
+Also the 'breaks=' command use to obtain 30  break points in histogram.
+
+```{r,chunk5,echo=TRUE}
+# question 5
+
+hist(readit$mean, main = "Histogram for mean values", xlab = "mean value", border = "black", col = "green", breaks = 30, xlim = c(0,50000))
+
+```
+
+## Question 6 - Downloading the tree growth data file and read it into R.
+Here the 'download.file()' command was used to obtain the data file. Then it was read into R. 
+It is important to set 'header=TRUE' so that the data is formated properly. 
+Also the 'head' command was used to obtain first 6 lines of the dataset and 'str' command to obtain the structure.
+the argument 'stringsAsFactors=FALSE' was used to obtain the factors as neumarical. 
+Also 'colnames()' command was used to indicate column identification.
+
+```{r,chunk6,echo=TRUE}
+# question 6
+
+download.file("https://raw.githubusercontent.com/markziemann/SLE712_files/master/bioinfo_asst3_part1_files/growth_data.csv", destfile = "growth_data.csv")
+treegrowth <- read.table("growth_data.csv", sep = ",", header = TRUE)
+treegrowth <- read.table("growth_data.csv", sep = ",", header = TRUE, stringsAsFactors = FALSE)
+head(treegrowth)
+str(treegrowth)
+colnames(treegrowth)
+
+```
+## Question 7 - Calculating the mean and standard deviation of tree circumference
+Here 2 subsets of data related to the tree growth from two sites (northeast and southwest) were obtained using 'subset()' command. 
+Also 'mean()' and 'sd()' commands were used to obtain means and standard deviations of tree circumference at the begining and the end of tree growth.
+
+```{r,chunk7,echo=TRUE}
+# question 7
+
+ne<- subset(treegrowth, Site =="northeast")
+head(ne)
+tail(ne)
+mean(ne$Circumf_2004_cm)
+mean(ne$Circumf_2019_cm)
+sd(ne$Circumf_2004_cm)
+sd(ne$Circumf_2019_cm)
+
+sw<- subset(treegrowth, Site =="southwest")
+head(sw)
+tail(sw)
+mean(sw$Circumf_2004_cm)
+mean(sw$Circumf_2019_cm)
+sd(sw$Circumf_2004_cm)
+sd(sw$Circumf_2019_cm)
+
+```
+## Question 8 - Making a box plot of tree circumference
+Here the 'boxplot()' function was used in order to make a box plot using tree circumference results of two cites at the begining and the end of growth.
+
+```{r,chunk8,echo=TRUE}
+# question 8
+
+boxplot(ne$Circumf_2004_cm,ne$Circumf_2019_cm,sw$Circumf_2004_cm,sw$Circumf_2019_cm, 
+        names = c("ne2004","ne2019","sw2004","sw2019"),ylab="Circumference(cm)", 
+        main="Tree circumference at the start and end of the study")
+
+```
+
+
+## Question 9 - Calculating the mean growth
+Here the 'mean()' command was used to calculate the mean growth of each site over the past 10 years.
+
+```{r,chunk9,echo=TRUE}
+# question 9
+
+ne$treegrowth<- ne$Circumf_2019_cm-ne$Circumf_2009_cm
+head(ne)
+mean(ne$treegrowth)
+sw$treegrowth<- sw$Circumf_2019_cm-sw$Circumf_2009_cm
+head(sw)
+mean(sw$treegrowth)
+
+```
+## Question 10 - Estimating the p value using t-test and wilcox test
+Here, 't.test()' function and 'wilcox.test()' function were used to obtain p values in order to check wether there is a difference between tree circumference in the begining and the end of tree growth.
+
+```{r,chunk10,echo=TRUE}
+# question 10
+
+t.test(sw$treegrowth,ne$treegrowth)
+wilcox.test(sw$treegrowth,ne$treegrowth)

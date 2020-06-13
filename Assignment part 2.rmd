@@ -1,0 +1,71 @@
+# question 1 - making a blast
+
+library("seqinr")
+library("rBLAST")
+library("R.utils")
+download.file("ftp://ftp.ensemblgenomes.org/pub/bacteria/release-42/fasta/bacteria_0_collection/escherichia_coli_str_k_12_substr_mg1655/cds/Escherichia_coli_str_k_12_substr_mg1655.ASM584v2.cds.all.fa.gz",destfile = "ecoli.fa.gz")
+unlink("ecoli.fa")
+gunzip("ecoli.fa.gz")
+makeblastdb("ecoli.fa",dbtype = "nucl","-parse_seqids")
+
+#question 2 # downloading my alocated sequence
+
+download.file("https://raw.githubusercontent.com/markziemann/SLE712_files/master/bioinfo_asst3_part2_files/sample.fa",destfile = "sample.fa")
+s<-read.fasta("sample.fa")
+myecoliseq<- s[[55]]
+myecoliseq
+str(myecoliseq)
+seqinr::GC(myecoliseq)
+length(myecoliseq)
+
+#question 3 # run a blast
+
+download.file("https://raw.githubusercontent.com/markziemann/SLE712_files/master/bioinfo_asst3_part2_files/mutblast_functions.R",destfile = "mutblast.R")
+source("mutblast.R")
+makeblastdb("ecoli.fa", dbtype = "nucl","-parse_seqids")
+res<- myblastn_tab(myseq = myecoliseq, db = "ecoli.fa")
+str(res)
+head(res)
+hits <- as.character(res$sseqid[1:3])
+hits
+hits<- c(hits,"AAC73439")
+hits
+
+#question 4 - # finding mismathes for 50 substitutions
+
+myecolimutator <- mutator(myecoliseq,50)
+res <- myblastn_tab(myseq = myecolimutator, db = "ecoli.fa")
+res
+
+# question 5 
+
+myecolimutator <- mutator(myecoliseq,100)
+res <- myblastn_tab(myseq = myecolimutator, db = "ecoli.fa")
+res
+
+myecolimutator <- mutator(myecoliseq,150)
+res <- myblastn_tab(myseq = myecolimutator, db = "ecoli.fa")
+res
+
+myecolimutator <- mutator(myecoliseq,200)
+res <- myblastn_tab(myseq = myecolimutator, db = "ecoli.fa")
+res
+
+myecolimutator <- mutator(myecoliseq,300)
+res <- myblastn_tab(myseq = myecolimutator, db = "ecoli.fa")
+res
+
+# determining the number of propotions of sites
+
+myfunc <- function(myseq,nmut) {
+  mutseq <- mutator( myseq= myecoliseq, nmut = 100) #the sequence for mutation, nmut=nmut as it will recognize the number after the sequence as nmut
+  res <- myblastn_tab(myseq= mutseq, db= "ecoli.fa") #for blast
+  if (is.null(res)) {myres= 0} else {myres = 1}
+  return(myres)
+  }
+myfunc(myseq = myecoliseq, nmut = 100)
+replicate(n = 100, expr = myfunc(myseq=seq,nmut=10) )
+n <- c(0,100,200,300)
+
+myfunc_rep <- function(nmut) {finalres <- sapply( n, myfunc_rep) finalres <- sapply(n,function( nmut ) (mean(replicate(n = 100, expr = myfunc(myseq=seq,nmut=nmut) ) ) ))}
+
